@@ -41,3 +41,30 @@ class SudokuGenerator:
         for j in range(9):
             if self.board[row][j] == num and j != col:
                 return False
+
+# Check column
+        for i in range(9):
+            if self.board[i][col] == num and i != row:
+                return False
+        
+        # Check 3x3 box
+        box_row = (row // 3) * 3
+        box_col = (col // 3) * 3
+        for i in range(box_row, box_row + 3):
+            for j in range(box_col, box_col + 3):
+                if self.board[i][j] == num and (i != row or j != col):
+                    return False
+        
+        return True
+    
+    def _fill_remaining(self, row: int, col: int) -> bool:
+        """Fill remaining cells using backtracking"""
+        if row == 8 and col == 9:
+            return True
+        
+        if col == 9:
+            row += 1
+            col = 0
+        
+        if self.board[row][col] != 0:
+            return self._fill_remaining(row, col + 1)

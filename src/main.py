@@ -68,3 +68,50 @@ class SudokuGenerator:
         
         if self.board[row][col] != 0:
             return self._fill_remaining(row, col + 1)
+        
+        # Try numbers 1-9 in random order
+        nums = list(range(1, 10))
+        random.shuffle(nums)
+        
+        for num in nums:
+            if self._is_valid(num, row, col):
+                self.board[row][col] = num
+                
+                if self._fill_remaining(row, col + 1):
+                    return True
+                
+                self.board[row][col] = 0
+        
+        return False
+    
+    def remove_cells(self, difficulty: str = "medium") -> List[List[int]]:
+        """
+        Remove cells based on difficulty level
+        Returns puzzle board with empty cells (0 = empty)
+        """
+        if not self.solution:
+            self.generate_full_board()
+        
+        puzzle = copy.deepcopy(self.solution)
+        
+        # Number of cells to remove based on difficulty
+        removal_counts = {
+            "easy": 40,      # ~40 clues
+            "medium": 50,    # ~31 clues
+            "hard": 60,      # ~21 clues
+            "expert": 65,    # ~16 clues
+            "extreme": 70    # ~11 clues
+        }
+        
+        count = removal_counts.get(difficulty.lower(), 50)
+        
+        # Get all cell positions
+        cells = [(i, j) for i in range(9) for j in range(9)]
+        random.shuffle(cells)
+        
+        # Remove cells
+        for i in range(count):
+            row, col = cells[i]
+            puzzle[row][col] = 0
+        
+        return puzzle

@@ -115,3 +115,39 @@ class SudokuGenerator:
             puzzle[row][col] = 0
         
         return puzzle
+
+    def generate_puzzle(self, difficulty: str = "medium") -> Tuple[List[List[int]], List[List[int]]]:
+        """
+        Generate a complete puzzle with solution
+        
+        Returns:
+            (puzzle_board, solution_board)
+        """
+        self.generate_full_board()
+        puzzle = self.remove_cells(difficulty)
+        return puzzle, self.solution
+    
+    def has_unique_solution(self, puzzle: List[List[int]]) -> bool:
+        """Check if the puzzle has exactly one solution"""
+        solutions = []
+        
+        def count_solutions(board, row=0, col=0):
+            if row == 9:
+                solutions.append(copy.deepcopy(board))
+                return len(solutions) > 1
+            
+            if col == 9:
+                return count_solutions(board, row + 1, 0)
+            
+            if board[row][col] != 0:
+                return count_solutions(board, row, col + 1)
+            
+            for num in range(1, 10):
+                if self._is_valid_solution_check(board, num, row, col):
+                    board[row][col] = num
+                    if count_solutions(board, row, col + 1):
+                        return True
+                    board[row][col] = 0
+            
+            return False
+    

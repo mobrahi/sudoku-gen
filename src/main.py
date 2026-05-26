@@ -41,8 +41,8 @@ class SudokuGenerator:
         for j in range(9):
             if self.board[row][j] == num and j != col:
                 return False
-
-# Check column
+        
+        # Check column
         for i in range(9):
             if self.board[i][col] == num and i != row:
                 return False
@@ -115,7 +115,7 @@ class SudokuGenerator:
             puzzle[row][col] = 0
         
         return puzzle
-
+    
     def generate_puzzle(self, difficulty: str = "medium") -> Tuple[List[List[int]], List[List[int]]]:
         """
         Generate a complete puzzle with solution
@@ -150,4 +150,83 @@ class SudokuGenerator:
                     board[row][col] = 0
             
             return False
+        
+        # Create a solver instance for validation
+        board_copy = copy.deepcopy(puzzle)
+        count_solutions(board_copy)
+        
+        return len(solutions) == 1
     
+    def _is_valid_solution_check(self, board, num, row, col):
+        """Validation for solution checking"""
+        for j in range(9):
+            if board[row][j] == num and j != col:
+                return False
+        
+        for i in range(9):
+            if board[i][col] == num and i != row:
+                return False
+        
+        box_row = (row // 3) * 3
+        box_col = (col // 3) * 3
+        for i in range(box_row, box_row + 3):
+            for j in range(box_col, box_col + 3):
+                if board[i][j] == num and (i != row or j != col):
+                    return False
+        
+        return True
+
+class SudokuDifficultyAnalyzer:
+    """Analyze and adjust puzzle difficulty"""
+    
+    @staticmethod
+    def count_empty_cells(puzzle: List[List[int]]) -> int:
+        """Count number of empty cells in puzzle"""
+        return sum(row.count(0) for row in puzzle)
+    
+    @staticmethod
+    def count_clues(puzzle: List[List[int]]) -> int:
+        """Count number of given clues"""
+        return 81 - SudokuDifficultyAnalyzer.count_empty_cells(puzzle)
+    
+    @staticmethod
+    def get_difficulty_from_clues(clue_count: int) -> str:
+        """Determine difficulty based on number of clues"""
+        if clue_count >= 36:
+            return "easy"
+        elif clue_count >= 32:
+            return "medium"
+        elif clue_count >= 28:
+            return "hard"
+        elif clue_count >= 24:
+            return "expert"
+        else:
+            return "extreme"
+    
+    @staticmethod
+    def analyze_puzzle(puzzle: List[List[int]]) -> dict:
+        """Provide detailed analysis of puzzle difficulty"""
+        empty_cells = SudokuDifficultyAnalyzer.count_empty_cells(puzzle)
+        clues = 81 - empty_cells
+        
+        return {
+            "empty_cells": empty_cells,
+            "clues": clues,
+            "difficulty": SudokuDifficultyAnalyzer.get_difficulty_from_clues(clues),
+            "completion_percentage": round((clues / 81) * 100, 1)
+        }
+
+def print_board(board: List[List[int]]):
+    """Pretty print a Sudoku board"""
+    for i in range(9):
+        if i % 3 == 0 and i != 0:
+            print("-" * 21)
+        
+        for j in range(9):
+            if j % 3 == 0 and j != 0:
+                print("|", end=" ")
+            
+            if j == 8:
+                print(board[i][j] if board[i][j] != 0 else ".")
+            else:
+                print(f"{board[i][j] if board[i][j] != 0 else '.'}", end=" ")
